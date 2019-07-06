@@ -1,3 +1,5 @@
+import * as bcrypt from 'bcrypt';
+
 import {
   ConflictException,
   InternalServerErrorException,
@@ -12,9 +14,12 @@ export class UserRepository extends Repository<User> {
   async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
     const { username, password } = authCredentialsDto;
 
+    const salt = await bcrypt.genSalt();
+
     const user = new User();
     user.username = username;
-    user.password = password;
+    user.salt = await bcrypt.genSalt();
+    user.password = await this.hasPassword(password, user.salt);
 
     try {
       await user.save();
@@ -25,5 +30,9 @@ export class UserRepository extends Repository<User> {
         throw new InternalServerErrorException();
       }
     }
+  }
+
+  private async hasPassword(password: string, salt: string): Promise<string> {
+    return await bcrypt.hash(password, salt);
   }
 }

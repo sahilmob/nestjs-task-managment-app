@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller,
-  Post,
-  UnauthorizedException,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
 
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { AuthService } from './auth.service';
@@ -21,10 +15,9 @@ export class AuthController {
   }
 
   @Post('/signin')
-  async signUn(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto) {
-    const username = this.authService.signIn(authCredentialsDto);
-    if (!username) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
+  async signUn(
+    @Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto,
+  ): Promise<{ accessToken: string }> {
+    return await this.authService.signIn(authCredentialsDto);
   }
 }
